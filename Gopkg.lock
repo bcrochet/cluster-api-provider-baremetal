@@ -249,6 +249,14 @@
   revision = "9140d7b451b41c2d80c6222991bbc00b0a75313c"
 
 [[projects]]
+  digest = "1:25d5979394aec77cdac3b9228a9db2e1257089aebca0dbe5a0fa5379c84ab874"
+  name = "github.com/miekg/dns"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "73601d4aed9d844322611759d7f3619110b7c88e"
+  version = "v1.1.8"
+
+[[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -313,6 +321,14 @@
   pruneopts = "T"
   revision = "65fb64232476ad9046e57c26cd0bff3d3a8dc6cd"
   version = "v1.4.3"
+
+[[projects]]
+  digest = "1:ef04c20bf6f1dcd5e1cd1fd27a65675649dfed58e89699fe2891cccc0a233efd"
+  name = "github.com/openshift/cluster-api"
+  packages = ["pkg/client/clientset_generated/clientset"]
+  pruneopts = "T"
+  revision = "3547f8dd93078c0b0f0b221ee1c2a57f96673081"
+  version = "0.0.0-alpha.4"
 
 [[projects]]
   digest = "1:e5d0bd87abc2781d14e274807a470acd180f0499f8bf5bb18606e9ec22ad9de9"
@@ -431,6 +447,14 @@
   version = "v1.0.3"
 
 [[projects]]
+  branch = "master"
+  digest = "1:f5fd86182cfb05b9a653de94ca12d91aff5a3ca3a497f6cbbd132499d9a35fe1"
+  name = "github.com/whyrusleeping/mdns"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "ef14215e6b30606f4ce84174ed7a644a05cb1af3"
+
+[[projects]]
   digest = "1:365b8ecb35a5faf5aa0ee8d798548fc9cd4200cb95d77a5b0b285ac881bae499"
   name = "go.uber.org/atomic"
   packages = ["."]
@@ -462,18 +486,23 @@
   version = "v1.9.1"
 
 [[projects]]
-  branch = "release-branch.go1.11"
-  digest = "1:6c1f398ca39ca7b372787df7833b71af914021af747e83c17163bad6aee25594"
+  branch = "master"
+  digest = "1:287367cdf1d4ad1b717dcc43a31f500eb36a2bdfc1ad3305fc023e58e1ece269"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "ssh/terminal",
+  ]
   pruneopts = "T"
-  revision = "56440b844dfe139a8ac053f4ecac0b20b79058f4"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
   digest = "1:0ef79f0d58752e0511f9db8687005343854847f52a17d932bbab9bf82dc78fee"
   name = "golang.org/x/net"
   packages = [
+    "bpf",
     "context",
     "context/ctxhttp",
     "html",
@@ -483,6 +512,10 @@
     "http2",
     "http2/hpack",
     "idna",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+    "ipv6",
   ]
   pruneopts = "T"
   revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
@@ -688,6 +721,7 @@
   digest = "1:6326c0acd4934569b53d305d4a79a30f7074b3d4fdb3537af06203b68297a22b"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -876,6 +910,8 @@
     "pkg/apis",
     "pkg/apis/cluster/common",
     "pkg/apis/cluster/v1alpha1",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/cluster/v1alpha1",
     "pkg/controller/error",
     "pkg/controller/machine",
     "pkg/util",
@@ -976,9 +1012,12 @@
     "github.com/metal3-io/baremetal-operator/pkg/apis/metal3/v1alpha1",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
+    "github.com/openshift/cluster-api/pkg/client/clientset_generated/clientset",
+    "github.com/whyrusleeping/mdns",
     "golang.org/x/net/context",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+    "k8s.io/apimachinery/pkg/api/equality",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",

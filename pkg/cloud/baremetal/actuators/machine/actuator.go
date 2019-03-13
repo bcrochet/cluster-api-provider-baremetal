@@ -25,8 +25,11 @@ import (
 
 	bmh "github.com/metal3-io/baremetal-operator/pkg/apis/metal3/v1alpha1"
 	bmv1alpha1 "github.com/metal3-io/cluster-api-provider-baremetal/pkg/apis/baremetal/v1alpha1"
+	clusterclient "github.com/openshift/cluster-api/pkg/client/clientset_generated/clientset"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/cluster-api/pkg/apis/cluster/common"
 	machinev1 "sigs.k8s.io/cluster-api/pkg/apis/cluster/v1alpha1"
@@ -53,18 +56,22 @@ const (
 
 // Actuator is responsible for performing machine reconciliation
 type Actuator struct {
-	client client.Client
+	client        client.Client
+	clusterClient clusterclient.Interface
+	Domain        string
 }
 
 // ActuatorParams holds parameter information for Actuator
 type ActuatorParams struct {
-	Client client.Client
+	Client        client.Client
+	ClusterClient clusterclient.Interface
 }
 
 // NewActuator creates a new Actuator
 func NewActuator(params ActuatorParams) (*Actuator, error) {
 	return &Actuator{
-		client: params.Client,
+		client:        params.Client,
+		clusterClient: params.ClusterClient,
 	}, nil
 }
 
@@ -123,6 +130,10 @@ func (a *Actuator) Create(ctx context.Context, cluster *machinev1.Cluster, machi
 		return err
 	}
 
+	if err := a.updateStatus(machine, host); err != nil {
+		return err
+	}
+
 	log.Printf("Finished creating machine %v .", machine.Name)
 	return nil
 }
@@ -174,6 +185,11 @@ func (a *Actuator) Update(ctx context.Context, cluster *machinev1.Cluster, machi
 	if err != nil {
 		return err
 	}
+
+	if err := a.updateStatus(machine, host); err != nil {
+		return err
+	}
+
 	log.Printf("Finished updating machine %v .", machine.Name)
 	return nil
 }
@@ -369,4 +385,54 @@ func configFromProviderSpec(providerSpec machinev1.ProviderSpec) (*bmv1alpha1.Ba
 	}
 
 	return &config, nil
+}
+
+// updateStatus updates a machine object's status.
+func (a *Actuator) updateStatus(machine *machinev1.Machine, host *bmh.BareMetalHost) error {
+	addrs, err := a.NodeAddresses(host)
+	if err != nil {
+		return err
+	}
+
+	if err := a.applyMachineStatus(machine, addrs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *Actuator) applyMachineStatus(machine *machinev1.Machine, addrs []corev1.NodeAddress) error {
+	machineCopy := machine.DeepCopy()
+	machineCopy.Status.Addresses = addrs
+
+	if equality.Semantic.DeepEqual(machine.Status, machineCopy.Status) {
+		// Status did not change
+		return nil
+	}
+
+	now := metav1.Now()
+	machineCopy.Status.LastUpdated = &now
+	_, err := a.clusterClient.ClusterV1alpha1().Machines(machineCopy.GetNamespace()).UpdateStatus(machineCopy)
+	return err
+}
+
+// NodeAddresses returns a slice of corev1.NodeAddress objects for a
+// given Baremetal machine.
+func (a *Actuator) NodeAddresses(host *bmh.BareMetalHost) ([]corev1.NodeAddress, error) {
+	addrs := []corev1.NodeAddress{}
+
+	// If the host is nil, return an empty address array.
+	if host == nil {
+		return addrs, nil
+	}
+
+	for _, nic := range host.Status.HardwareDetails.NIC {
+		address := corev1.NodeAddress{
+			Type: "InternalIP",
+			Address: nic.IP,
+		}
+		addrs = append(addrs, address)
+	}
+
+	return addrs, nil
 }

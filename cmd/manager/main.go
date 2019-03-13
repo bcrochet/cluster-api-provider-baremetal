@@ -25,6 +25,7 @@ import (
 	bmoapis "github.com/metal3-io/baremetal-operator/pkg/apis"
 	"github.com/metal3-io/cluster-api-provider-baremetal/pkg/apis"
 	"github.com/metal3-io/cluster-api-provider-baremetal/pkg/cloud/baremetal/actuators/machine"
+	clusterclient "github.com/openshift/cluster-api/pkg/client/clientset_generated/clientset"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
@@ -65,8 +66,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	clusterClient, err := clusterclient.NewForConfig(cfg)
+	if err != nil {
+		panic(err)
+	}
+
 	machineActuator, err := machine.NewActuator(machine.ActuatorParams{
-		Client: mgr.GetClient(),
+		Client:        mgr.GetClient(),
+		ClusterClient: clusterClient,
 	})
 	if err != nil {
 		panic(err)
